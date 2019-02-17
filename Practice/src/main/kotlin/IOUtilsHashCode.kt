@@ -34,15 +34,17 @@ object IOUtilsHashCode {
         return problemData
     }
 
-
     @Throws(IOException::class)
     internal fun saveOutput(toSave: OutputData, fileName: String) {
-        var resultString = "${toSave.result.size}\n"
+        val bwit = File(fileName).bufferedWriter()
+        bwit.write("${toSave.result.size}\n")
         for (i in toSave.result) {
-            resultString = "$resultString${i.startRow} ${i.startColumn} ${i.endRow} ${i.endColumn}\n"
+            bwit.write("${i.startRow} ${i.startColumn} ${i.endRow} ${i.endColumn}")
+            bwit.newLine()
         }
-        Files.write(Paths.get(fileName), resultString.toByteArray())
+        bwit.close()
     }
+
 
     fun obtainScore(toSave: OutputData): Int {
         return toSave.result.fold(0) { acc, actual -> acc + actual.score }

@@ -5,7 +5,7 @@ object Main {
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val problemSetName ="c_medium" // a_example b_small c_medium d_big
+        val problemSetName ="d_big" // a_example b_small c_medium d_big
         val problemData = IOUtilsHashCode.loadInput("./input/$problemSetName.in")
         val beforeTime = System.currentTimeMillis()
         val outputData = AlgorithmSimplest2019.algorithm(problemData)

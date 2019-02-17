@@ -59,7 +59,7 @@ object AlgorithmSimplest2019 : SolverAlgorithm {
         val outputData = OutputData()
         val posibleSlices = obtainAvailableSlices(problemData)
 
-        val allPosibleSlices = HashSet<Slice>()
+        val allPosibleSlices = ArrayList<Slice>()
 
         for (actualRow in 0 until problemData.rowNumber) {
             for (actualColumn in 0 until problemData.columnNumber) {
@@ -75,12 +75,13 @@ object AlgorithmSimplest2019 : SolverAlgorithm {
             }
         }
 
-        while (allPosibleSlices.isNotEmpty()) {
-            val actualMax = allPosibleSlices.maxBy { it.score }
-            doSlice(problemData.pizza, actualMax!!)
-            outputData.result.add(actualMax)
-            allPosibleSlices.removeAll { it.overlaps(actualMax) }
-            println(allPosibleSlices.size)
+        allPosibleSlices.sortedBy { (-it.score) }
+
+        for (i in 0 until allPosibleSlices.size){
+            if(allPosibleSlices[i].isValid(problemData)){
+                doSlice(problemData.pizza, allPosibleSlices[i])
+                outputData.result.add(allPosibleSlices[i])
+            }
         }
 
         return outputData
