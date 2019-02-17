@@ -25,4 +25,9 @@ class Slice(var startRow: Int = 0, var startColumn: Int = 0, var endRow: Int, va
                 && numOfTomato >= problemData.minOfEachIngredient
                 && numOfMushroom + numOfTomato <= problemData.maxSliceSize
     }
+
+    fun overlaps(other: Slice): Boolean {
+        return ((other.startRow - endRow) * (other.endRow - startRow) <= 0) &&
+                ((other.startColumn - endColumn) * (other.endColumn - startColumn) <= 0)
+    }
 }
