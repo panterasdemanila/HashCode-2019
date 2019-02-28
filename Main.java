@@ -6,9 +6,8 @@ public class Main {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         int numFotos= Integer.parseInt(line);
-        int[][] pizza = new int[rowNumber][colNumber];
-        Map<Integer,ArrayList<String>> listaHoriz = new HashMap<Integer,ArrayList<>>();
-        Map<Integer,ArrayList<String>> listaVertic = new HashMap<Integer,ArrayList<>>();
+        HashMap<Integer,ArrayList<String>> listaHoriz = new HashMap<Integer,ArrayList<String>>();
+        HashMap<Integer,ArrayList<String>> listaVertic = new HashMap<Integer,ArrayList<String>>();
         int i = 0;
         while ((line = br.readLine()) != null) {
             String lines=br.readLine();
