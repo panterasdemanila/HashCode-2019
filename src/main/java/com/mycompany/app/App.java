@@ -16,7 +16,7 @@ import java.util.List;
 // Definicion de entidades
 
 class Photo {
-    Number id;
+    Integer id;
     String orientation;
     int tagsNumber;
     ArrayList<String> tagsList = new ArrayList<String>();
@@ -51,7 +51,10 @@ class Slide {
 public class App {
 
     public static void main(String[] args) throws Exception {
-        String fichero = "a_example";
+       // String fichero = "c_memorable_moments";
+        //String fichero = "b_lovely_landscapes";
+        String fichero = "d_pet_pictures";
+        //String fichero = "e_shiny_selfies";
 
         // Leer Fichero Entrada
         String fileString = readFileAsString(fichero + ".txt");
@@ -75,10 +78,29 @@ public class App {
 
         ArrayList<Slide> salida = new ArrayList<>();
 
+        ArrayList<Photo> verticals =  new ArrayList<>();
+
+        ArrayList<Photo> horizontals =  new ArrayList<>();
+
         for (Photo actual_photo : photoList) {
             if (actual_photo.orientation.equals("H")) {
-                salida.add(new Slide(actual_photo.tagsNumber, null));
+                horizontals.add(actual_photo);
+            }else {
+                verticals.add(actual_photo);
             }
+        }
+
+        List<Photo> head = verticals.subList(0, verticals.size() / 2);
+        List<Photo> tail = verticals.subList(verticals.size() / 2, verticals.size());
+
+        int max_iter = head.size() < tail.size() ? head.size() : tail.size();
+
+        for (int r = 0 ; r < max_iter ; r++){
+            salida.add(new Slide(head.get(r).id, tail.get(r).id));
+        }
+
+        for (Photo actual_photo : horizontals){
+            salida.add(new Slide(actual_photo.id, null));
         }
 
         String string_output = salida.size() + "\n";
