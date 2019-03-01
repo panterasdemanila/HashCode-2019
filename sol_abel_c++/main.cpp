@@ -4,6 +4,7 @@
 #include <chrono>
 #include "Photo.h"
 #include "io_operations.h"
+#include <limits>
 
 using namespace std;
 
@@ -12,20 +13,82 @@ int main() {
     auto start_time = chrono::steady_clock::now();
 
     cout << "Read input" << endl;
-    list<Photo> input = read_input("./input/b_lovely_landscapes.txt");
+    list<Photo> input = read_input("./input/d_pet_pictures.txt");
     /* Algorithm */
     cout << "Executing algorithm" << endl;
     list<Photo> result;
 
-    input.sort([](const Photo &photo1, const Photo &photo2) {
+    list<Photo> verticals_top;
+    list<Photo> horizontals_top;
+
+    list<Photo> verticals_result;
+
+    for (auto &photo_act: input) {
+        if (photo_act.orientation) {
+            horizontals_top.emplace_back(photo_act);
+        } else {
+            verticals_top.emplace_back(photo_act);
+        }
+    }
+
+    /**
+    * Vertical algorithm
+    */
+
+    unsigned int divisions = 1;
+
+    unsigned int partition_size = verticals_top.size() / divisions;
+
+    auto verticals_iter = verticals_top.begin();
+
+    for (int i = 0; i < divisions; ++i) {
+        auto actual_iterator = verticals_iter;
+        advance(verticals_iter, partition_size);
+
+        set<Photo> verticals(actual_iterator, verticals_iter);
+        while (!verticals.empty()) {
+            auto actual_selection = *verticals.begin();
+            verticals.erase(actual_selection);
+
+            auto best_pair = actual_selection;
+            int best_pair_score = -1;
+
+            for (const auto &actual_pair : verticals) {
+                auto tags_in_common = actual_selection.tags_in_common(actual_pair);
+                int score = 1000000 - tags_in_common;
+                if (best_pair_score < score) {
+                    best_pair_score = score;
+                    best_pair = actual_pair;
+                }
+            }
+
+            if (best_pair_score != -1) {
+                verticals_result.emplace_back(Photo(actual_selection, best_pair));
+                verticals.erase(best_pair);
+            }
+
+            if (verticals.size() % 2048 == 0) {
+                cout << i << " " << verticals.size() << endl;
+            }
+        }
+    }
+
+
+    // Merge results after vertical algorithm
+    horizontals_top.splice(horizontals_top.begin(), verticals_result);
+
+    /**
+     * Horizontal algorithm
+     */
+    horizontals_top.sort([](const Photo &photo1, const Photo &photo2) {
         return photo1.tags_number() < photo2.tags_number();
     });
 
-    unsigned int divisions = 4;
+    divisions = 1;
 
-    unsigned int partition_size = input.size() / divisions;
+    partition_size = horizontals_top.size() / divisions;
 
-    auto input_iter = input.begin();
+    auto input_iter = horizontals_top.begin();
 
     auto last_photo = *input_iter;
 
@@ -53,13 +116,11 @@ int main() {
                 cout << i << " " << horizontals.size() << endl;
             }
         }
-
-
     }
 
     /* Output */
     cout << "Writing output" << endl;
-    save_output("./output/b_lovely_landscapes.txt", result);
+    save_output("./output/d_pet_pictures.txt", result);
 
     auto end_time = chrono::steady_clock::now();
 

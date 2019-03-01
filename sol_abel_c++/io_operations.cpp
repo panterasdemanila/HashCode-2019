@@ -17,8 +17,6 @@ list<Photo> read_input(const char path[]) {
 
         map<string, unsigned int> tasks_map;
 
-        unsigned long max_score = 0;
-
         for (unsigned int i = 0; i < size_of_data; i++) {
             list<unsigned int> tags;
             string orientation;
@@ -38,14 +36,11 @@ list<Photo> read_input(const char path[]) {
                 }
             }
 
-            max_score=+ tags.size() / 2;
-
             tags.sort();
             output.emplace_back(Photo(i, orientation == "H", tags));
         }
 
         cout << "Different tags: " << tasks_map.size() << endl;
-        cout << "Max score: " << max_score << endl;
     }
     myfile.close();
 
@@ -72,8 +67,12 @@ void save_output(const char path[], const list<Photo> &result) {
             score += last_iterator.score(actual);
             last_iterator = actual;
 
-            myfile << result_iterator->id << endl;
-
+            if (result_iterator->orientation)
+                myfile << result_iterator->id << endl;
+            else {
+                auto to_save = result_iterator->get_id_pair();
+                myfile << to_save.first << " " << to_save.second << endl;
+            }
             ++result_iterator;
         }
     }
