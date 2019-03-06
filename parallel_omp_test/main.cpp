@@ -5,10 +5,18 @@
 #include "Photo.h"
 #include "io_operations.h"
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
 
 using namespace std;
 
 int main() {
+
+	#ifdef _OPENMP
+		omp_lock_t lock;
+		omp_init_lock(&lock);
+	#endif
 
 	auto start_time = chrono::steady_clock::now();
 
@@ -34,7 +42,7 @@ int main() {
 	// iter < result.size()
 	while(itRe!=result.end() && numMatch>0){
 		match = false;
-		percSup = 94; percInf = 6;
+		percSup = 85; percInf = 15;
 
 		while(!match){
 			percSup = percSup + 5;
@@ -42,21 +50,34 @@ int main() {
 
 			Photo photoRes = *itRe;
 
-			for (auto &itCo : input){
-				Photo photoCom = itCo;
+
+			#pragma omp parallel for
+			for(int i=0; i < input.size(); i++){
+				#ifdef _OPENMP
+  					omp_set_lock(&lock);
+				#endif
+				auto itCo = next(input.begin(),i);
+				Photo photoCom = *itCo;
 				int percRes = photoRes.compareTags(photoCom);
 
-				if(percInf <= percRes && percRes <= percSup){
+				//cout << omp_get_num_threads() << endl;
+				if(percInf <= percRes && percRes <= percSup && !match){
+
 					numMatch--;
 					result.emplace_back(photoCom);
 					cout << input.size() << ", " << photoCom.id << endl;
-					input.erase(itCo);
+					auto itComp = next(input.begin(),i);
+					input.erase(itComp);
+					i--;
 					match=true;
-					break;
+
 				}
+				#ifdef _OPENMP
+					omp_unset_lock(&lock);
+				#endif
 			}
 		}
-		itRe++;
+		advance(itRe,1);
 	}
 
 	/* Output */
