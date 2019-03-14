@@ -1,7 +1,3 @@
-//
-// Created by abel on 3/1/19.
-//
-
 #include "Photo.h"
 #include <fstream>
 #include <iostream>

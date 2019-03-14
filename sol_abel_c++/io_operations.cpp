@@ -1,7 +1,3 @@
-//
-// Created by abel on 3/1/19.
-//
-
 #include "io_operations.h"
 
 using namespace std;

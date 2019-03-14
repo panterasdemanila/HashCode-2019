@@ -13,7 +13,8 @@ int main() {
     auto start_time = chrono::steady_clock::now();
 
     cout << "Read input" << endl;
-    list<Photo> input = read_input("./input/d_pet_pictures.txt");
+    list<Photo> input = read_input("./input/e_shiny_selfies.txt");
+
     /* Algorithm */
     cout << "Executing algorithm" << endl;
     list<Photo> result;
@@ -22,6 +23,19 @@ int main() {
     list<Photo> horizontals_top;
 
     list<Photo> verticals_result;
+
+    /**
+     * Select only part of the input
+     * TODO: Remove this part on produce
+     */
+    auto data_to_use = 20000;
+    auto last_input = input.begin();
+    advance(last_input, data_to_use);
+    input = list<Photo>(input.begin(), last_input);
+
+    /**
+    * End of select input size
+    */
 
     for (auto &photo_act: input) {
         if (photo_act.orientation) {
@@ -35,44 +49,42 @@ int main() {
     * Vertical algorithm
     */
 
-    unsigned int divisions = 1;
+    long media_tags = 0;
 
-    unsigned int partition_size = verticals_top.size() / divisions;
-
-    auto verticals_iter = verticals_top.begin();
-
-    for (int i = 0; i < divisions; ++i) {
-        auto actual_iterator = verticals_iter;
-        advance(verticals_iter, partition_size);
-
-        set<Photo> verticals(actual_iterator, verticals_iter);
-        while (!verticals.empty()) {
-            auto actual_selection = *verticals.begin();
-            verticals.erase(actual_selection);
-
-            auto best_pair = actual_selection;
-            int best_pair_score = -1;
-
-            for (const auto &actual_pair : verticals) {
-                auto tags_in_common = actual_selection.tags_in_common(actual_pair);
-                int score = 1000000 - tags_in_common;
-                if (best_pair_score < score) {
-                    best_pair_score = score;
-                    best_pair = actual_pair;
-                }
-            }
-
-            if (best_pair_score != -1) {
-                verticals_result.emplace_back(Photo(actual_selection, best_pair));
-                verticals.erase(best_pair);
-            }
-
-            if (verticals.size() % 2048 == 0) {
-                cout << i << " " << verticals.size() << endl;
-            }
-        }
+    for (auto &actual_tag : verticals_top) {
+        media_tags += actual_tag.tags_number();
     }
 
+    if (!verticals_top.empty())
+        media_tags = (media_tags / verticals_top.size()) * 2;
+
+    set<Photo> verticals(verticals_top.begin(), verticals_top.end());
+
+    while (!verticals.empty()) {
+        auto actual_selection = *verticals.begin();
+        verticals.erase(actual_selection);
+
+        auto best_pair = actual_selection;
+        long best_pair_score = -1;
+
+        for (const auto &actual_pair : verticals) {
+            long score = actual_selection.heuristic_pair(actual_pair, media_tags);
+
+            if (best_pair_score < score) {
+                best_pair_score = score;
+                best_pair = actual_pair;
+            }
+        }
+
+        if (best_pair_score != -1) {
+            verticals_result.emplace_back(Photo(actual_selection, best_pair));
+            verticals.erase(best_pair);
+        }
+
+        if (verticals.size() % 2048 == 0) {
+            cout << verticals.size() << endl;
+        }
+    }
 
     // Merge results after vertical algorithm
     horizontals_top.splice(horizontals_top.begin(), verticals_result);
@@ -84,43 +96,36 @@ int main() {
         return photo1.tags_number() < photo2.tags_number();
     });
 
-    divisions = 1;
+    set<Photo> horizontals(horizontals_top.begin(), horizontals_top.end());
 
-    partition_size = horizontals_top.size() / divisions;
+    auto last_photo = *horizontals.begin();
+    result.emplace_back(last_photo);
+    horizontals.erase(horizontals.begin());
 
-    auto input_iter = horizontals_top.begin();
+    while (!horizontals.empty()) {
+        auto best = horizontals.begin();
+        long best_score = -1;
 
-    auto last_photo = *input_iter;
-
-    for (int i = 0; i < divisions; ++i) {
-        auto actual_iterator = input_iter;
-        advance(input_iter, partition_size);
-        set<Photo> horizontals(actual_iterator, input_iter);
-        horizontals.erase(last_photo);
-
-        while (!horizontals.empty()) {
-            Photo best = last_photo;
-            int best_score = -1;
-            for (auto const &internal : horizontals) {
-                int mm = last_photo.score(internal);
-                if (best_score < mm) {
-                    best = internal;
-                    best_score = mm;
-                }
+        for (auto internal = horizontals.begin(); internal != horizontals.end(); internal++) {
+            long mm = last_photo.heuristic_next(*internal);
+            if (best_score < mm) {
+                best = internal;
+                best_score = mm;
             }
-            last_photo = best;
-            horizontals.erase(last_photo);
-            result.emplace_back(last_photo);
+        }
 
-            if (horizontals.size() % 2048 == 0) {
-                cout << i << " " << horizontals.size() << endl;
-            }
+        last_photo = *best;
+        horizontals.erase(best);
+        result.emplace_back(last_photo);
+
+        if (horizontals.size() % 2048 == 0) {
+            cout << horizontals.size() << endl;
         }
     }
 
     /* Output */
     cout << "Writing output" << endl;
-    save_output("./output/d_pet_pictures.txt", result);
+    save_output("./output/e_shiny_selfies.txt", result);
 
     auto end_time = chrono::steady_clock::now();
 
