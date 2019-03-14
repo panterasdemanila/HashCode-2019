@@ -1,4 +1,4 @@
-# Panteras de Manila - Hash Code 2019
+# Solution of Panteras de Manila in HashCode 2019 Qualification Round
 
 Authors:
 * Jorge Martínez
