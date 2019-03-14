@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++   -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/HashCode2019.dir/main.cpp.o CMakeFiles/HashCode2019.dir/Photo.cpp.o CMakeFiles/HashCode2019.dir/io_operations.cpp.o  -o HashCode2019 
